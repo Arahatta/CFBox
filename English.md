@@ -1,5 +1,8 @@
 # CFBox Subscription Manager
 
+> **切换语言**  [简体中文](https://github.com/PAICNI/CFBox/blob/main/README.md)  [English](https://github.com/PAICNI/CFBox/blob/main/English.md) [ فارسی
+](https://github.com/PAICNI/CFBox/blob/main/%D9%81%D8%A7%D8%B1%D8%B3%DB%8C.md)
+> 
 > **A proxy subscription management panel running on Cloudflare Workers, compatible with both CFnew and edgetunnel** — it serves VLESS/Trojan/xhttp multi-protocol subscriptions at the `/UUID` path while providing a graphical configuration interface (KV-backed, changes take effect instantly), with built-in latency testing, streaming/AI connectivity checks, multi-client subscription generation, and multi-language support.
 
 ---
