@@ -875,6 +875,41 @@ export default {
           }
         });
       }
+      if (网址698.pathname.includes('/api/latency-test')) {
+        const 测速路径段9 = 网址698.pathname.split('/').filter(参数值9 => 参数值9);
+        const 测速接口位置9 = 测速路径段9.indexOf('api');
+        if (测速接口位置9 > 0) {
+          const 测速路径前缀9 = 测速路径段9.slice(0, 测速接口位置9);
+          const 测速路径字符串9 = 测速路径前缀9.join('/');
+          let 测速路径有效9 = false;
+          if (自定义路径 && 自定义路径.trim()) {
+            const 清理路径9 = 自定义路径.trim().startsWith('/') ? 自定义路径.trim().substring(1) : 自定义路径.trim();
+            测速路径有效9 = 测速路径字符串9 === 清理路径9;
+          } else {
+            测速路径有效9 = 是否有效格式(测速路径字符串9) && 测速路径字符串9 === 认证令牌;
+          }
+          if (测速路径有效9) {
+            return await 处理延迟测速接口(请求735);
+          } else {
+            return new Response(JSON.stringify({
+              error: '路径验证失败'
+            }), {
+              status: 403,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+          }
+        }
+        return new Response(JSON.stringify({
+          error: '无效的API路径'
+        }), {
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      }
       if (请求735.method === 'POST' && 启用扩展传输) {
         const 结果值684 = await 处理扩展超文本值(请求735);
         if (结果值684) {
@@ -4758,7 +4793,7 @@ async function 处理订阅值(请求241, 用户240 = null) {
                 border-radius: var(--radius-sm) !important;
                 background: var(--surface-2) !important;
             }
-            #latencyTestStatus { color: var(--text-dim) !important; }
+            #latencyTestStatus { color: var(--text-dim); }
 
             /* ---------- 响应式 ---------- */
             @media (max-width: 720px) {
@@ -6936,8 +6971,26 @@ document.addEventListener('DOMContentLoaded', function () {
         };
       }
       function 渲染结果(结果20046, 索引20045, 值值20044 = true) {
-        // 只展示在线优选成功的结果，失败/超时的不再显示
+        // 展示全部测速结果：成功项正常显示，失败/超时项以灰色显示原因（保证始终有反馈）
         if (!结果20046.success) {
+          const 失败项 = document.createElement('div');
+          失败项.style.cssText = 'display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #331111; gap: 10px; opacity: 0.7;';
+          失败项.dataset.index = 索引20045;
+          失败项.dataset.colo = 结果20046.colo || '';
+          if (!值值20044) 失败项.style.display = 'none';
+          const 失败复选框 = document.createElement('input');
+          失败复选框.type = 'checkbox';
+          失败复选框.checked = false;
+          失败复选框.disabled = true;
+          失败复选框.dataset.index = 索引20045;
+          失败复选框.style.cssText = 'width: 18px; height: 18px; cursor: not-allowed; opacity: 0.4;';
+          const 失败描述 = document.createElement('div');
+          失败描述.style.cssText = 'flex: 1; font-family: monospace; font-size: 13px;';
+          const 错误原因 = (结果20046.error && 结果20046.error !== '测试失败') ? 结果20046.error : '连接失败/超时';
+          失败描述.innerHTML = '<span style="color:#8a8a8a;">' + 结果20046.host + ':' + 结果20046.port + '</span> <span style="color:#ff6666;">✗ ' + 错误原因 + '</span>';
+          失败项.appendChild(失败复选框);
+          失败项.appendChild(失败描述);
+          结果列表列表.appendChild(失败项);
           return null;
         }
         const 结果项目 = document.createElement('div');
@@ -6990,7 +7043,9 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
       }
-      测试状态.textContent = '${语言代码236 === 'fa' ? 'تست کامل شد' : 语言代码236 === 'en' ? 'Test complete' : '测试完成'}: ' + 本地值20055 + '/' + 本地值20054;
+      const 成功计数20001 = 测试结果列表.filter(本地结果20001 => 本地结果20001.success).length;
+      const 失败计数20002 = 测试结果列表.length - 成功计数20001;
+      测试状态.textContent = '${语言代码236 === 'fa' ? 'تست کامل شد' : 语言代码236 === 'en' ? 'Test complete' : '测试完成'}: ' + 成功计数20001 + '/' + 本地值20054 + (失败计数20002 > 0 ? ' (' + 失败计数20002 + ' ${语言代码236 === 'fa' ? 'ناموفق' : 语言代码236 === 'en' ? 'failed' : '失败'})' : '');
       开始测试值.style.display = 'inline-block';
       值测试值.style.display = 'none';
 
@@ -7025,7 +7080,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function 获取已选项目() {
     const 本地值20029 = 结果列表列表.querySelectorAll('input[type="checkbox"]:checked');
     if (本地值20029.length === 0) {
-      显示状态('${语言代码236 === 'fa' ? 'لطفا حداقل یک مورد انتخاب کنید' : 语言代码236 === 'en' ? 'Please select at least one item' : '请至少选择一项'}', 'error');
+      if (测试状态) { 测试状态.style.display = 'block'; 测试状态.textContent = '${语言代码236 === 'fa' ? 'لطفا حداقل یک مورد انتخاب کنید' : 语言代码236 === 'en' ? 'Please select at least one item' : '请至少选择一项'}'; 测试状态.style.color = '#ffcc00'; }
       return null;
     }
     const 已选项目列表20028 = [];
@@ -7060,9 +7115,9 @@ document.addEventListener('DOMContentLoaded', function () {
           s: document.getElementById('socksConfig').value
         };
         await 保存配置(配置数据20021);
-        显示状态('${语言代码236 === 'fa' ? 'موفقیت‌آمیز بود' : 语言代码236 === 'en' ? 'Overwritten' : '已覆盖'} ' + 已选项目列表20024.length + ' ${语言代码236 === 'fa' ? 'مورد و ذخیره شد' : 语言代码236 === 'en' ? ' items saved' : '项并已保存'}', 'success');
+        if (测试状态) { 测试状态.style.display = 'block'; 测试状态.textContent = '${语言代码236 === 'fa' ? 'موفقیت‌آمیز بود' : 语言代码236 === 'en' ? 'Overwritten' : '已覆盖'} ' + 已选项目列表20024.length + ' ${语言代码236 === 'fa' ? 'مورد و ذخیره شد' : 语言代码236 === 'en' ? ' items saved' : '项并已保存'}'; 测试状态.style.color = '#00ff9d'; }
       } catch (错误20020) {
-        显示状态('${语言代码236 === 'fa' ? 'خطا در ذخیره' : 语言代码236 === 'en' ? 'Save failed' : '保存失败'}: ' + 错误20020.message, 'error');
+        if (测试状态) { 测试状态.style.display = 'block'; 测试状态.textContent = '${语言代码236 === 'fa' ? 'خطا در ذخیره' : 语言代码236 === 'en' ? 'Save failed' : '保存失败'}: ' + 错误20020.message; 测试状态.style.color = '#ff6666'; }
       } finally {
         覆盖已选值.disabled = false;
         追加已选值.disabled = false;
@@ -7092,9 +7147,9 @@ document.addEventListener('DOMContentLoaded', function () {
           s: document.getElementById('socksConfig').value
         };
         await 保存配置(配置数据);
-        显示状态('${语言代码236 === 'fa' ? 'موفقیت‌آمیز بود' : 语言代码236 === 'en' ? 'Appended' : '已追加'} ' + 已选项目列表.length + ' ${语言代码236 === 'fa' ? 'مورد و ذخیره شد' : 语言代码236 === 'en' ? ' items saved' : '项并已保存'}', 'success');
+        if (测试状态) { 测试状态.style.display = 'block'; 测试状态.textContent = '${语言代码236 === 'fa' ? 'موفقیت‌آمیز بود' : 语言代码236 === 'en' ? 'Appended' : '已追加'} ' + 已选项目列表.length + ' ${语言代码236 === 'fa' ? 'مورد و ذخیره شد' : 语言代码236 === 'en' ? ' items saved' : '项并已保存'}'; 测试状态.style.color = '#00ff9d'; }
       } catch (错误20019) {
-        显示状态('${语言代码236 === 'fa' ? 'خطا در ذخیره' : 语言代码236 === 'en' ? 'Save failed' : '保存失败'}: ' + 错误20019.message, 'error');
+        if (测试状态) { 测试状态.style.display = 'block'; 测试状态.textContent = '${语言代码236 === 'fa' ? 'خطا در ذخیره' : 语言代码236 === 'en' ? 'Save failed' : '保存失败'}: ' + 错误20019.message; 测试状态.style.color = '#ff6666'; }
       } finally {
         覆盖已选值.disabled = false;
         追加已选值.disabled = false;
@@ -7523,73 +7578,58 @@ document.addEventListener('DOMContentLoaded', function () {
       城市值.forEach(本地值 => 本地值.disabled = false);
     }
   }
-  async function 测试延迟(主机, 端口, 信号) {
-    const 超时 = 8000;
-    let 机房 = '';
-    let 测试网址 = '';
+    async function 测试延迟(主机, 端口, 信号) {
+    // 延迟测速改为调用服务端 /api/latency-test（cloudflare:sockets TCP 连接测真实延迟）
+    const 控制器 = new AbortController();
+    const 超时定时器9 = setTimeout(function () { 控制器.abort(); }, 10000);
     try {
-      const 控制器 = new AbortController();
-      const 超时标识 = setTimeout(() => 控制器.abort(), 超时);
       if (信号) {
         信号.addEventListener('abort', () => 控制器.abort());
       }
-      const 清理主机 = 主机.replace(/^\\[|\\]$/g, '');
-      const 十六进制地址 = 地址转十六进制(清理主机);
-      const 测试域名 = 十六进制地址 ? 十六进制地址 + '.nip.lfree.org' : 清理主机 + '.nip.lfree.org';
-      测试网址 = 'https://' + 测试域名 + ':' + 端口 + '/';
-      console.log('[LatencyTest] Testing:', 测试网址, 'Original:', 主机 + ':' + 端口, 'HexIP:', 十六进制地址);
-      const 首次开始 = Date.now();
-      const 响应1 = await fetch(测试网址, {
+      const 目标 = 主机 + ':' + 端口;
+      const 响应 = await fetch(window.location.pathname + '/api/latency-test?targets=' + encodeURIComponent(目标), {
         signal: 控制器.signal
       });
-      const 首次值 = Date.now() - 首次开始;
-      if (!响应1.ok) {
-        clearTimeout(超时标识);
+      if (!响应.ok) {
         return {
           success: false,
-          latency: 首次值,
-          error: 'HTTP ' + 响应1.status + ' ' + 响应1.statusText,
+          latency: -1,
+          error: 'HTTP ' + 响应.status,
           colo: '',
-          testUrl: 测试网址
+          testUrl: ''
         };
       }
-      try {
-        const 文本 = await 响应1.text();
-        console.log('[LatencyTest] Response body:', 文本.substring(0, 200));
-        const 数据 = JSON.parse(文本);
-        if (数据.colo) {
-          机房 = 数据.colo;
-        }
-      } catch (事件值) {
-        console.log('[LatencyTest] Parse error:', 事件值.message);
+      const 数据 = await 响应.json();
+      const 结果 = 数据 && 数据.results && 数据.results[0];
+      if (结果 && 结果.success) {
+        clearTimeout(超时定时器9);
+        return {
+          success: true,
+          latency: 结果.latency || 0,
+          colo: '',
+          testUrl: ''
+        };
       }
-      const 值开始 = Date.now();
-      const 响应2 = await fetch(测试网址, {
-        signal: 控制器.signal
-      });
-      await 响应2.text();
-      const 延迟 = Date.now() - 值开始;
-      clearTimeout(超时标识);
-      console.log('[LatencyTest] First:', 首次值 + 'ms (DNS+TLS+RTT)', 'Second:', 延迟 + 'ms (RTT only)');
+      clearTimeout(超时定时器9);
       return {
-        success: true,
-        latency: 延迟,
-        colo: 机房,
-        testUrl: 测试网址
+        success: false,
+        latency: -1,
+        error: (结果 && 结果.error) || '测试失败',
+        colo: '',
+        testUrl: ''
       };
     } catch (错误) {
+      clearTimeout(超时定时器9);
       const 错误消息 = 错误.name === 'AbortError' ? '${语言代码236 === 'fa' ? 'زمان تمام شد' : 语言代码236 === 'en' ? 'Timeout' : '超时'}' : 错误.message;
-      console.log('[LatencyTest] Error:', 错误消息, 'URL:', 测试网址);
       return {
         success: false,
         latency: -1,
         error: 错误消息,
         colo: '',
-        testUrl: 测试网址
+        testUrl: ''
       };
     }
-  }
-});
+  }});
 </script>
     </body>
     </html>`;
@@ -8503,6 +8543,69 @@ async function 处理节点测速接口() {
       }
     });
   }
+}
+
+async function 处理延迟测速接口(请求) {
+  // 服务端延迟测速：使用 cloudflare:sockets 建立 TCP 连接，测量连接建立耗时（真实延迟）
+  // 参数：targets=主机1[:端口1],主机2[:端口2]...  port=默认端口（可选，默认443）
+  const 测速网址对象9 = new URL(请求.url);
+  const 测速参数9 = 测速网址对象9.searchParams;
+  const 测速目标字符串9 = (测速参数9.get('targets') || '').trim();
+  const 测速默认端口9 = 测速参数9.get('port') || '443';
+  const 测速原始列表9 = 测速目标字符串9.split(',').map(参数值9 => 参数值9.trim()).filter(参数值9 => 参数值9);
+  if (测速原始列表9.length === 0 || 测速原始列表9.length > 100) {
+    return new Response(JSON.stringify({ success: false, error: '目标数量无效' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  const 测速目标列表9 = 测速原始列表9.map(原始9 => {
+    let 主机9 = 原始9;
+    let 端口9 = 测速默认端口9;
+    if (主机9.includes('#')) 主机9 = 主机9.split('#')[0];
+    if (主机9.startsWith('[')) {
+      const 闭合9 = 主机9.indexOf(']');
+      if (闭合9 > 0) {
+        const 尾部9 = 主机9.slice(闭合9 + 1);
+        if (尾部9.startsWith(':')) 端口9 = 尾部9.slice(1);
+        主机9 = 主机9.slice(0, 闭合9 + 1);
+      }
+    } else if (主机9.includes(':')) {
+      const 最后冒号9 = 主机9.lastIndexOf(':');
+      const 端口尾部9 = 主机9.slice(最后冒号9 + 1);
+      if (/^[0-9]+$/.test(端口尾部9)) {
+        端口9 = 端口尾部9;
+        主机9 = 主机9.slice(0, 最后冒号9);
+      }
+    }
+    return { 主机9: 主机9.replace(/^\[|\]$/g, ''), 端口9: parseInt(端口9) || 443 };
+  });
+  const 测试单个9 = (项9) => new Promise((解析9) => {
+    const 开始9 = Date.now();
+    let 已结束9 = false;
+    const 收尾9 = (结果9) => { if (已结束9) return; 已结束9 = true; 解析9(结果9); };
+    let 套接字9 = null;
+    try {
+      套接字9 = 连接({ hostname: 项9.主机9, port: 项9.端口9 });
+      套接字9.opened.then(() => {
+        const 延迟9 = Date.now() - 开始9;
+        try { 套接字9.close(); } catch (错误9) {}
+        收尾9({ success: true, host: 项9.主机9, port: 项9.端口9, latency: 延迟9, error: '' });
+      }).catch((错误9) => {
+        收尾9({ success: false, host: 项9.主机9, port: 项9.端口9, latency: -1, error: String((错误9 && 错误9.code) || 'connection_failed') });
+      });
+      setTimeout(() => {
+        try { if (套接字9) 套接字9.close(); } catch (错误9) {}
+        收尾9({ success: false, host: 项9.主机9, port: 项9.端口9, latency: -1, error: 'timeout' });
+      }, 8000);
+    } catch (错误9) {
+      收尾9({ success: false, host: 项9.主机9, port: 项9.端口9, latency: -1, error: 'error' });
+    }
+  });
+  const 测速结果9 = await Promise.all(测速目标列表9.map(测试单个9));
+  return new Response(JSON.stringify({ success: true, results: 测速结果9 }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 async function 处理优选地址列表接口(请求) {
