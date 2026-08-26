@@ -4,6 +4,15 @@
 
 ---
 
+> **[Telegram 交流群](https://t.me/SZ_PAI)**
+> **[YouTube 频道](https://www.youtube.com/@PAI_CN)**
+---
+![](1.png)
+![](2.png)
+![](3.png)
+
+---
+
 ## 目录
 
 - [一、项目概述与兼容性](#一项目概述与兼容性)
