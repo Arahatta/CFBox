@@ -1,5 +1,8 @@
 # CFBox 订阅管理器
 
+> **切换语言**  [简体中文](https://github.com/PAICNI/CFBox/blob/main/README.md)  [English](https://github.com/PAICNI/CFBox/blob/main/English.md) [ فارسی
+](https://github.com/PAICNI/CFBox/blob/main/%D9%81%D8%A7%D8%B1%D8%B3%DB%8C.md)
+
 > **一个运行在 Cloudflare Workers 上兼容CFnew 与edgetunnel的代理订阅管理面板**——既能在 `/UUID` 路径上输出 VLESS/Trojan/xhttp 多协议订阅，又提供图形化配置界面（KV 存储、改完即生效），并内置延迟测试、流媒体/AI 连通性检测、多客户端订阅生成、多语言等能力。
 
 ---
