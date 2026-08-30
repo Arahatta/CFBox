@@ -184,22 +184,6 @@ function 获取有效配置快照(环境值 = {}) {
     ...键值配置
   });
 }
-const 地区映射 = {
-  'HK': ['🇭🇰 香港', 'HK', 'Hong Kong'],
-  'US': ['🇺🇸 美国', 'US', 'United States'],
-  'SG': ['🇸🇬 新加坡', 'SG', 'Singapore'],
-  'JP': ['🇯🇵 日本', 'JP', 'Japan'],
-  'KR': ['🇰🇷 韩国', 'KR', 'South Korea'],
-  'DE': ['🇩🇪 德国', 'DE', 'Germany'],
-  'SE': ['🇸🇪 瑞典', 'SE', 'Sweden'],
-  'NL': ['🇳🇱 荷兰', 'NL', 'Netherlands'],
-  'FI': ['🇫🇮 芬兰', 'FI', 'Finland'],
-  'GB': ['🇬🇧 英国', 'GB', 'United Kingdom'],
-  'Oracle': ['甲骨文', 'Oracle'],
-  'DigitalOcean': ['数码海', 'DigitalOcean'],
-  'Vultr': ['Vultr', 'Vultr'],
-  'Multacom': ['Multacom', 'Multacom']
-};
 // 官方直连地址池：内置实测可用地址，不依赖任何第三方域名
 // CF 是任播，同一地址在不同位置落到的机房不同，所以不按地区区分
 const 官方直连地址 = "172.71.218.190,162.158.228.87,162.158.189.134,162.158.26.63,162.158.25.86,162.158.29.216,162.158.218.160,162.158.227.214,172.69.118.198,172.69.119.150".split(',');
@@ -386,30 +370,6 @@ function 是否有效地址(地址792) {
   if (值6值正则.test(地址792)) return true;
   return false;
 }
-function 创建节点命名器(跳过 = false) {
-  // 如果配置了 yxURL，则跳过编号
-  const 值跳过 = typeof 优选地址源 !== 'undefined' && 优选地址源 && 优选地址源.trim();
-  let 跳过编号791 = 值跳过 || 跳过;
-  const 计数器组790 = {};
-  function 设置跳过编号(本地值789) {
-    if (!值跳过) {
-      跳过编号791 = 本地值789;
-    }
-  }
-  function 处理命名器(基础名称, 节点名称788 = null) {
-    if (跳过编号791 || 基础名称 && 基础名称.includes('.')) {
-      return 节点名称788 || 基础名称;
-    }
-    if (!计数器组790[基础名称]) 计数器组790[基础名称] = 0;
-    计数器组790[基础名称]++;
-    const 索引787 = String(计数器组790[基础名称]).padStart(2, '0');
-    return `${节点名称788 || 基础名称}-${索引787}`;
-  }
-  return {
-    namer: 处理命名器,
-    setSkipNumbering: 设置跳过编号
-  };
-}
 function 规范化节点主机(主机786) {
   return String(主机786 || '').trim().replace(/^\[([^\]]+)\]$/, '$1');
 }
@@ -516,23 +476,6 @@ function 获取配置值(键765, 默认值 = '') {
 async function 设置配置值(键764, 值763) {
   键值配置[键764] = 值763;
   await 保存键值配置();
-}
-async function 检查地址可用性(域名760, 端口759 = 443, 超时758 = 2000) {
-  try {
-    const 控制器757 = new AbortController();
-    const 超时标识756 = setTimeout(() => 控制器757.abort(), 超时758);
-    const 响应755 = await fetch(`https://${域名760}`, {
-      method: 'HEAD',
-      signal: 控制器757.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; CF-IP-Checker/1.0)'
-      }
-    });
-    clearTimeout(超时标识756);
-    return 响应755.status < 500;
-  } catch (错误754) {
-    return true;
-  }
 }
 async function 获取值备用地址(工作器地区753 = '', 值地区匹配752 = 启用地区匹配) {
   // 没指定地区（wk 留空=官方直连）时走内置地址，不依赖第三方域名
@@ -1681,109 +1624,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 };
-function 生成值配置654(链接列表653) {
-  return btoa(链接列表653.join('\n'));
-}
 
-// 解析分享链接并生成客户端节点配置
-function 解析链接值值节点(链接652) {
-  try {
-    // 解析第一类链接
-    if (链接652.startsWith("vless://")) {
-      const 网址651 = new URL(链接652);
-      const 名称650 = decodeURIComponent(网址651.hash.substring(1));
-      const 唯一标识649 = 网址651.username;
-      const 本地值648 = 网址651.hostname;
-      const 端口647 = parseInt(网址651.port) || 443;
-      const 参数646 = new URLSearchParams(网址651.search);
-      const 传输层安全645 = 参数646.get('security') === 'tls' || 参数646.get('tls') === 'true';
-      const 本地值644 = 参数646.get('type') || 'ws';
-      const 路径643 = 参数646.get('path') || '/?ed=2048';
-      const 主机642 = 参数646.get('host') || 本地值648;
-      const 本地值641 = 参数646.get('sni') || 主机642;
-      const 应用层协议协商原始640 = 参数646.get('alpn') || '';
-      const 本地值639 = 参数646.get('fp') || 参数646.get('client-fingerprint') || 'chrome';
-      const 加密客户端问候638 = 参数646.get('ech');
-      const 节点637 = {
-        name: 名称650,
-        type: "vless",
-        server: 本地值648,
-        port: 端口647,
-        uuid: 唯一标识649,
-        tls: 传输层安全645,
-        network: 本地值644,
-        'client-fingerprint': 本地值639
-      };
-      if (传输层安全645) {
-        节点637.servername = 本地值641;
-        if (应用层协议协商原始640) 节点637.alpn = 应用层协议协商原始640.split(',').map(甲值636 => 甲值636.trim()).filter(Boolean);
-        节点637['skip-cert-verify'] = false;
-      }
-      if (本地值644 === 'ws') {
-        节点637['ws-opts'] = {
-          path: 路径643,
-          headers: {
-            Host: 主机642
-          }
-        };
-      }
-      if (加密客户端问候638) {
-        const 加密客户端问候域名635 = 自定义加密客户端问候域名 || 'cloudflare-ech.com';
-        节点637['ech-opts'] = {
-          enable: true,
-          'query-server-name': 加密客户端问候域名635
-        };
-      }
-      return 节点637;
-    }
-
-    // 解析第二类链接
-    if (链接652.startsWith("trojan://")) {
-      const 网址634 = new URL(链接652);
-      const 名称633 = decodeURIComponent(网址634.hash.substring(1));
-      const 密码632 = 网址634.username;
-      const 本地值631 = 网址634.hostname;
-      const 端口630 = parseInt(网址634.port) || 443;
-      const 参数629 = new URLSearchParams(网址634.search);
-      const 本地值628 = 参数629.get('type') || 'ws';
-      const 路径 = 参数629.get('path') || '/?ed=2048';
-      const 主机627 = 参数629.get('host') || 本地值631;
-      const 服务名称指示626 = 参数629.get('sni') || 主机627;
-      const 应用层协议协商原始 = 参数629.get('alpn') || '';
-      const 加密客户端问候 = 参数629.get('ech');
-      const 节点 = {
-        name: 名称633,
-        type: "trojan",
-        server: 本地值631,
-        port: 端口630,
-        password: 密码632,
-        network: 本地值628,
-        sni: 服务名称指示626,
-        'skip-cert-verify': false
-      };
-      if (应用层协议协商原始) 节点.alpn = 应用层协议协商原始.split(',').map(甲值625 => 甲值625.trim()).filter(Boolean);
-      if (本地值628 === 'ws') {
-        节点['ws-opts'] = {
-          path: 路径,
-          headers: {
-            Host: 主机627
-          }
-        };
-      }
-      if (加密客户端问候) {
-        const 加密客户端问候域名624 = 自定义加密客户端问候域名 || 'cloudflare-ech.com';
-        节点['ech-opts'] = {
-          enable: true,
-          'query-server-name': 加密客户端问候域名624
-        };
-      }
-      return 节点;
-    }
-  } catch (事件值623) {
-    return null;
-  }
-  return null;
-}
 
 // ============================================================
 // 内部格式转换器 - 不依赖外部服务
@@ -2482,164 +2323,9 @@ function 生成值值(链接列表541) {
   return 行列表538.join('\n');
 }
 
-// 兼容旧调用名
-async function 生成值配置533(链接列表532) {
-  return 生成值值589(链接列表532);
-}
-function 生成值配置531(链接列表530) {
-  return 生成值值562(链接列表530);
-}
-function 生成值配置529(链接列表528) {
-  return 生成值值552(链接列表528);
-}
-function 生成值值配置527(链接列表526) {
-  return 生成值值(链接列表526);
-}
-function 生成值值配置(链接列表525) {
-  return 生成值值数据对象(链接列表525);
-}
-function 生成值配置(链接列表524) {
-  return btoa(链接列表524.join('\n'));
-}
-function 生成值2值配置(链接列表523) {
-  return btoa(链接列表523.join('\n'));
-}
 
 // 全局变量存储ECH调试信息
 let 加密客户端问候调试值 = '';
-async function 获取加密客户端问候配置(域名522) {
-  if (!启用加密客户端问候) {
-    加密客户端问候调试值 = 'ECH功能已禁用';
-    return null;
-  }
-  加密客户端问候调试值 = '';
-  const 调试步骤 = [];
-  try {
-    // 优先使用 Google DNS 查询 cloudflare-ech.com 的 ECH 配置
-    调试步骤.push('尝试使用 Google DNS 查询 cloudflare-ech.com...');
-    const 加密客户端问候域名网址 = `https://v.recipes/dns/dns.google/dns-query?name=cloudflare-ech.com&type=65`;
-    const 加密客户端问候响应 = await fetch(加密客户端问候域名网址, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-    调试步骤.push(`Google DNS 响应状态: ${加密客户端问候响应.status}`);
-    if (加密客户端问候响应.ok) {
-      const 加密客户端问候数据 = await 加密客户端问候响应.json();
-      调试步骤.push(`Google DNS 返回数据: ${JSON.stringify(加密客户端问候数据).substring(0, 200)}...`);
-      if (加密客户端问候数据.Answer && 加密客户端问候数据.Answer.length > 0) {
-        调试步骤.push(`找到 ${加密客户端问候数据.Answer.length} 条答案记录`);
-        for (const 本地值521 of 加密客户端问候数据.Answer) {
-          if (本地值521.data) {
-            调试步骤.push(`解析答案数据: ${typeof 本地值521.data}, 长度: ${String(本地值521.data).length}`);
-            // Google DNS 返回的数据格式可能不同，需要解析
-            const 数据字符串520 = typeof 本地值521.data === 'string' ? 本地值521.data : JSON.stringify(本地值521.data);
-            const 加密客户端问候值519 = 数据字符串520.match(/ech=([^\s"']+)/);
-            if (加密客户端问候值519 && 加密客户端问候值519[1]) {
-              加密客户端问候调试值 = 调试步骤.join('\\n') + '\\n✅ 成功从 Google DNS 获取 ECH 配置';
-              return 加密客户端问候值519[1];
-            }
-            // 如果没有找到，尝试直接使用 data（可能是 base64 编码的）
-            if (本地值521.data && !数据字符串520.includes('ech=')) {
-              try {
-                const 已解码518 = atob(本地值521.data);
-                调试步骤.push(`尝试 base64 解码，解码后长度: ${已解码518.length}`);
-                const 已解码值517 = 已解码518.match(/ech=([^\s"']+)/);
-                if (已解码值517 && 已解码值517[1]) {
-                  加密客户端问候调试值 = 调试步骤.join('\\n') + '\\n✅ 成功从 Google DNS (base64解码) 获取 ECH 配置';
-                  return 已解码值517[1];
-                }
-              } catch (事件值516) {
-                调试步骤.push(`base64 解码失败: ${事件值516.message}`);
-              }
-            }
-          }
-        }
-      } else {
-        调试步骤.push('Google DNS 未返回答案记录');
-      }
-    } else {
-      调试步骤.push(`Google DNS 请求失败: ${加密客户端问候响应.status}`);
-    }
-
-    // 如果 cloudflare-ech.com 查询失败，尝试使用 Google DNS 查询目标域名的 HTTPS 记录
-    调试步骤.push(`尝试使用 Google DNS 查询目标域名 ${域名522}...`);
-    const 加密域名查询网址 = `https://v.recipes/dns/dns.google/dns-query?name=${encodeURIComponent(域名522)}&type=65`;
-    const 响应515 = await fetch(加密域名查询网址, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-    调试步骤.push(`Google DNS (目标域名) 响应状态: ${响应515.status}`);
-    if (响应515.ok) {
-      const 数据514 = await 响应515.json();
-      调试步骤.push(`Google DNS (目标域名) 返回数据: ${JSON.stringify(数据514).substring(0, 200)}...`);
-      if (数据514.Answer && 数据514.Answer.length > 0) {
-        调试步骤.push(`找到 ${数据514.Answer.length} 条答案记录`);
-        for (const 本地值513 of 数据514.Answer) {
-          if (本地值513.data) {
-            const 数据字符串 = typeof 本地值513.data === 'string' ? 本地值513.data : JSON.stringify(本地值513.data);
-            const 加密客户端问候值512 = 数据字符串.match(/ech=([^\s"']+)/);
-            if (加密客户端问候值512 && 加密客户端问候值512[1]) {
-              加密客户端问候调试值 = 调试步骤.join('\\n') + '\\n✅ 成功从 Google DNS (目标域名) 获取 ECH 配置';
-              return 加密客户端问候值512[1];
-            }
-            // 尝试 base64 解码
-            try {
-              const 已解码511 = atob(本地值513.data);
-              const 已解码值 = 已解码511.match(/ech=([^\s"']+)/);
-              if (已解码值 && 已解码值[1]) {
-                加密客户端问候调试值 = 调试步骤.join('\\n') + '\\n✅ 成功从 Google DNS (目标域名, base64解码) 获取 ECH 配置';
-                return 已解码值[1];
-              }
-            } catch (事件值510) {
-              调试步骤.push(`base64 解码失败: ${事件值510.message}`);
-            }
-          }
-        }
-      } else {
-        调试步骤.push('Google DNS (目标域名) 未返回答案记录');
-      }
-    } else {
-      调试步骤.push(`Google DNS (目标域名) 请求失败: ${响应515.status}`);
-    }
-
-    // 如果 Google DNS 失败，尝试使用 Cloudflare DNS 作为备选
-    调试步骤.push('尝试使用 Cloudflare DNS 作为备选...');
-    const 云墙加密客户端问候网址 = `https://cloudflare-dns.com/dns-query?name=cloudflare-ech.com&type=65`;
-    const 云墙响应 = await fetch(云墙加密客户端问候网址, {
-      headers: {
-        'Accept': 'application/dns-json'
-      }
-    });
-    调试步骤.push(`Cloudflare DNS 响应状态: ${云墙响应.status}`);
-    if (云墙响应.ok) {
-      const 云墙数据 = await 云墙响应.json();
-      调试步骤.push(`Cloudflare DNS 返回数据: ${JSON.stringify(云墙数据).substring(0, 200)}...`);
-      if (云墙数据.Answer && 云墙数据.Answer.length > 0) {
-        调试步骤.push(`找到 ${云墙数据.Answer.length} 条答案记录`);
-        for (const 本地值509 of 云墙数据.Answer) {
-          if (本地值509.data) {
-            const 加密客户端问候值 = 本地值509.data.match(/ech=([^\s"']+)/);
-            if (加密客户端问候值 && 加密客户端问候值[1]) {
-              加密客户端问候调试值 = 调试步骤.join('\\n') + '\\n✅ 成功从 Cloudflare DNS 获取 ECH 配置';
-              return 加密客户端问候值[1];
-            }
-          }
-        }
-      } else {
-        调试步骤.push('Cloudflare DNS 未返回答案记录');
-      }
-    } else {
-      调试步骤.push(`Cloudflare DNS 请求失败: ${云墙响应.status}`);
-    }
-    加密客户端问候调试值 = 调试步骤.join('\\n') + '\\n❌ 所有DNS查询均失败，未获取到ECH配置';
-    return null;
-  } catch (错误508) {
-    加密客户端问候调试值 = 调试步骤.join('\\n') + '\\n❌ 获取ECH配置时发生错误: ' + 错误508.message;
-    return null;
-  }
-}
 // ==================== ⚡️ 优选订阅生成模块（移植自 edgetunnel 优选订阅生成） ====================
 function 整理成数组(内容) {
   const 替换后的内容 = String(内容 || '').replace(/[	"'\r\n]+/g, ',').replace(/,+/g, ',');
@@ -5779,7 +5465,6 @@ xn--b6gac.eu.org
         </div>
         <script>
 // 地址从服务器配置注入
-var 订阅转换网址 = "${订阅转换接口}";
 
 
 // 翻译对象
@@ -5821,7 +5506,6 @@ if (已保存语言20209 === 'fa' || 已保存语言20209 === 'fa-IR') {
     语言代码20208 = 'zh';
   }
 }
-const 是否值20208 = 语言代码20208 === 'fa';
 const 翻译值20207 = 本地值20215[语言代码20208] || 本地值20215['zh'];
 function 切换语言(语言) {
   localStorage.setItem('preferredLanguage', 语言);
@@ -5854,11 +5538,6 @@ function 更新模式按钮() {
 })();
 
 
-// ===== ⚡ 优选工具：优选方式选择弹窗（edgetunnel 原版交互）=====
-function 打开优选方式(来源) {
-  const 遮罩 = document.getElementById('optimizeToolOverlay');
-  if (遮罩) 遮罩.style.display = 'flex';
-}
 function 关闭优选方式() {
   const 遮罩 = document.getElementById('optimizeToolOverlay');
   if (遮罩) 遮罩.style.display = 'none';
@@ -6603,111 +6282,6 @@ async function 检查系统状态() {
     document.getElementById('backupStatus').innerHTML = 翻译值20156.proxyIPStatus + '<span style="color: #ff3860;">❌ ' + 翻译值20156.detectionFailed + '</span>';
     document.getElementById('currentIP').innerHTML = 翻译值20156.currentIP + '<span style="color: #ff3860;">❌ ' + 翻译值20156.detectionFailed + '</span>';
     document.getElementById('regionMatch').innerHTML = 翻译值20156.regionMatch + '<span style="color: #ff3860;">❌ ' + 翻译值20156.detectionFailed + '</span>';
-  }
-}
-async function 测试接口() {
-  try {
-    function 获取凭据20155(名称20154) {
-      const 值20153 = '; ' + document.cookie;
-      const 部分列表20152 = 值20153.split('; ' + 名称20154 + '=');
-      if (部分列表20152.length === 2) return 部分列表20152.pop().split(';').shift();
-      return null;
-    }
-    const 浏览器语言20151 = navigator.language || navigator.userLanguage || '';
-    const 已保存语言20150 = localStorage.getItem('preferredLanguage') || 获取凭据20155('preferredLanguage');
-    let 语言代码20149 = 'zh';
-    if (已保存语言20150 === 'fa' || 已保存语言20150 === 'fa-IR') {
-      语言代码20149 = 'fa';
-    } else if (已保存语言20150 === 'en' || 已保存语言20150 === 'en-US' || 已保存语言20150 === 'en-GB') {
-      语言代码20149 = 'en';
-    } else if (已保存语言20150 === 'zh' || 已保存语言20150 === 'zh-CN') {
-      语言代码20149 = 'zh';
-    } else {
-      if (浏览器语言20151.includes('fa') || 浏览器语言20151.includes('fa-IR')) {
-        语言代码20149 = 'fa';
-      } else if (浏览器语言20151.includes('en')) {
-        语言代码20149 = 'en';
-      } else {
-        语言代码20149 = 'zh';
-      }
-    }
-    const 是否值20149 = 语言代码20149 === 'fa';
-    const 本地值20148 = {
-      zh: {
-        apiTestResult: 'API检测结果: ',
-        apiTestTime: '检测时间: ',
-        apiTestFailed: 'API检测失败: ',
-        unknownError: '未知错误',
-        apiTestError: 'API测试失败: '
-      },
-      fa: {
-        apiTestResult: 'نتیجه تشخیص API: ',
-        apiTestTime: 'زمان تشخیص: ',
-        apiTestFailed: 'تشخیص API ناموفق: ',
-        unknownError: 'خطای ناشناخته',
-        apiTestError: 'تست API ناموفق: '
-      },
-      en: {
-        apiTestResult: 'API detection result: ',
-        apiTestTime: 'Detection time: ',
-        apiTestFailed: 'API detection failed: ',
-        unknownError: 'Unknown error',
-        apiTestError: 'API test failed: '
-      }
-    };
-    const 翻译值20147 = 本地值20148[语言代码20149] || 本地值20148['zh'];
-    const 响应20146 = await fetch(window.location.pathname + '/test-api');
-    const 数据20145 = await 响应20146.json();
-    if (数据20145.detectedRegion) {
-      显示提示(翻译值20147.apiTestResult + 数据20145.detectedRegion + '\\n' + 翻译值20147.apiTestTime + 数据20145.timestamp, 'info', {
-        duration: 5000
-      });
-    } else {
-      显示提示(翻译值20147.apiTestFailed + (数据20145.error || 翻译值20147.unknownError), 'error', {
-        duration: 4500
-      });
-    }
-  } catch (错误20144) {
-    function 获取凭据20143(名称20142) {
-      const 值20141 = '; ' + document.cookie;
-      const 部分列表20140 = 值20141.split('; ' + 名称20142 + '=');
-      if (部分列表20140.length === 2) return 部分列表20140.pop().split(';').shift();
-      return null;
-    }
-    const 浏览器语言20139 = navigator.language || navigator.userLanguage || '';
-    const 已保存语言20138 = localStorage.getItem('preferredLanguage') || 获取凭据20143('preferredLanguage');
-    let 语言代码20137 = 'zh';
-    if (已保存语言20138 === 'fa' || 已保存语言20138 === 'fa-IR') {
-      语言代码20137 = 'fa';
-    } else if (已保存语言20138 === 'en' || 已保存语言20138 === 'en-US' || 已保存语言20138 === 'en-GB') {
-      语言代码20137 = 'en';
-    } else if (已保存语言20138 === 'zh' || 已保存语言20138 === 'zh-CN') {
-      语言代码20137 = 'zh';
-    } else {
-      if (浏览器语言20139.includes('fa') || 浏览器语言20139.includes('fa-IR')) {
-        语言代码20137 = 'fa';
-      } else if (浏览器语言20139.includes('en')) {
-        语言代码20137 = 'en';
-      } else {
-        语言代码20137 = 'zh';
-      }
-    }
-    const 是否值20137 = 语言代码20137 === 'fa';
-    const 本地值20136 = {
-      zh: {
-        apiTestError: 'API测试失败: '
-      },
-      fa: {
-        apiTestError: 'تست API ناموفق: '
-      },
-      en: {
-        apiTestError: 'API test failed: '
-      }
-    };
-    const 翻译值20135 = 本地值20136[语言代码20137] || 本地值20136['zh'];
-    显示提示(翻译值20135.apiTestError + 错误20144.message, 'error', {
-      duration: 4500
-    });
   }
 }
 
@@ -9094,11 +8668,6 @@ function 关闭套接字值(套接字) {
 const 十六进制值 = Array.from({
   length: 256
 }, (取值, 索引值) => (索引值 + 256).toString(16).slice(1));
-function 处理格式值(本地值114, 偏移 = 0) {
-  const 标识 = (十六进制值[本地值114[偏移]] + 十六进制值[本地值114[偏移 + 1]] + 十六进制值[本地值114[偏移 + 2]] + 十六进制值[本地值114[偏移 + 3]] + "-" + 十六进制值[本地值114[偏移 + 4]] + 十六进制值[本地值114[偏移 + 5]] + "-" + 十六进制值[本地值114[偏移 + 6]] + 十六进制值[本地值114[偏移 + 7]] + "-" + 十六进制值[本地值114[偏移 + 8]] + 十六进制值[本地值114[偏移 + 9]] + "-" + 十六进制值[本地值114[偏移 + 10]] + 十六进制值[本地值114[偏移 + 11]] + 十六进制值[本地值114[偏移 + 12]] + 十六进制值[本地值114[偏移 + 13]] + 十六进制值[本地值114[偏移 + 14]] + 十六进制值[本地值114[偏移 + 15]]).toLowerCase();
-  if (!是否有效格式(标识)) throw new TypeError(错误_无效标识字符串);
-  return 标识;
-}
 async function 获取值解析新地址列表() {
   let 网址113 = 优选地址源;
   // 【修复】未配置优选IP来源URL（yxURL）时使用内置默认优选源，让官方直连等模式默认即可下发大量节点（对齐 cfnew 节点下发能力）
@@ -10051,12 +9620,6 @@ function 处理数组值值(数组) {
 function 是否有效域名(域名) {
   const 域名正则 = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
   return 域名正则.test(域名);
-}
-async function 解析文本值数组(内容) {
-  var 已处理 = 内容.replace(/[	"'\r\n]+/g, ',').replace(/,+/g, ',');
-  if (已处理.charAt(0) == ',') 已处理 = 已处理.slice(1);
-  if (已处理.charAt(已处理.length - 1) == ',') 已处理 = 已处理.slice(0, 已处理.length - 1);
-  return 已处理.split(',');
 }
 async function 获取优选接口(网址列表, 默认端口 = '443', 超时 = 3000) {
   if (!网址列表?.length) return [];
