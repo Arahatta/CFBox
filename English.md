@@ -8,6 +8,22 @@
 
 > **[YouTube Channel](https://www.youtube.com/@PAI_CN)**
 ---
+## Changelog (v1.0 → v1.1)
+
+### Preferred Source Expansion
+- Built-in preferred sources expanded from **26 to 32**
+- bestcf regional sources expanded from **5 to 11 regions**, newly added: KR, DE, SE, NL, FI, GB
+
+### Bug Fixes
+- Fixed the bug where all nodes were still delivered even after a specific region was specified
+
+### Multi-Source IP Region Detection
+- **v1.0**: single source `ping0.cc`
+- **v1.1**: primary source `ping0.cc` + fallback source `ipinfo.io`, with automatic fallback
+
+### Compatibility
+- Config items, API endpoints, protocols (VLESS / Trojan / xhttp), panel / multilingual support / clients, etc. **all remain unchanged**
+- Upgrade requires **no changes to KV or environment variables**
 
 ## 1. Project Overview and Compatibility
 
