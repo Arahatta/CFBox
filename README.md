@@ -8,6 +8,30 @@
 
 > **[YouTube 频道](https://www.youtube.com/@PAI_CN)**
 ---
+# 更新日志（v1.0 → v1.1）
+
+## 更新内容
+
+### 内置优选源扩充
+- 内置优选源由 **26 条扩充至 32 条**
+- bestcf 区域源由 **5 地扩展至 11 地**，新增：KR、DE、SE、NL、FI、GB
+
+### IP 地区检测多源化
+- **v1.0**：单源 `ping0.cc`
+- **v1.1**：主源 `ping0.cc` + 备用源 `ipinfo.io`，自动降级
+
+### 解锁检测站点更新
+- 新增 [https://max.com](https://max.com)（HBOMax 新品牌）
+- 细化 OpenAI / Gemini 探测路径
+- 移除 [https://hbomax.com](https://hbomax.com)
+
+### 新增项目主页链接
+- 新增 [https://github.com/PAICNI/CFBox](https://github.com/PAICNI/CFBox)
+
+### 兼容性
+- 配置项、API 接口、协议（VLESS / Trojan / xhttp）、面板 / 多语言 / 客户端等**全部保持不变**
+- 升级无需修改 KV 和环境变量
+
 
 ## 一、项目概述与兼容性
 
