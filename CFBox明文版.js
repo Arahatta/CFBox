@@ -7,8 +7,8 @@ function srv1226_51(Content) {
     link151_6 = link151_6.slice(0, link151_6.length - 1);
   return link151_6.split(',');
 }
-// CFBox - Terminal v1.0
-// version: v1.0（merging CFnew + EdgeTunnel features）
+// CFBox - Terminal v1.1
+// version: v1.1（merging CFnew + EdgeTunnel features）
 function state881_36(fn670_27) {
   try {
     if (fn670_27.startsWith('vless://')) {
@@ -4038,7 +4038,7 @@ async function res467_19(link1087_45, cli1260_52 = null) {
         FI: '\uD83C\uDDEB\uD83C\uDDEE 芬兰',
         GB: '\uD83C\uDDEC\uD83C\uDDE7 英国'
       },
-      terminal: 'CFBox 终端 v1.0',
+      terminal: 'CFBox 终端 v1.1',
       githubProject: 'GitHub 项目',
       PrefUtil: '优选工具',
       autoDetectClient: '自动识别',
@@ -4249,7 +4249,7 @@ async function res467_19(link1087_45, cli1260_52 = null) {
         FI: '\uD83C\uDDEB\uD83C\uDDEE فنلاند',
         GB: '\uD83C\uDDEC\uD83C\uDDE7 بریتانیا'
       },
-      terminal: 'ترمینال v1.0',
+      terminal: 'ترمینال v1.1',
       githubProject: 'پروژه GitHub',
       PrefUtil: 'ابزار ترجیح IP',
       autoDetectClient: 'تشخیص خودکار',
@@ -4460,7 +4460,7 @@ async function res467_19(link1087_45, cli1260_52 = null) {
         FI: '\uD83C\uDDEB\uD83C\uDDEE Finland',
         GB: '\uD83C\uDDEC\uD83C\uDDE7 United Kingdom'
       },
-      terminal: 'CFBox Terminal v1.0',
+      terminal: 'CFBox Terminal v1.1',
       githubProject: 'GitHub Project',
       PrefUtil: 'Preferred Tools',
       autoDetectClient: 'Auto Detect',
@@ -4873,6 +4873,32 @@ async function res467_19(link1087_45, cli1260_52 = null) {
                 backdrop-filter: blur(10px);
                 animation: toast-in .25s ease;
             }
+            .cp-toast-success {
+                background: linear-gradient(135deg, #00c853, #00b894) !important;
+                border: 1px solid #00ff9d !important;
+                color: #fff !important;
+                text-shadow: 0 0 6px rgba(255,255,255,.45) !important;
+                box-shadow: 0 10px 30px rgba(0,255,157,.35) !important;
+            }
+            .cp-toast-error {
+                background: linear-gradient(135deg, #ff3860, #d63031) !important;
+                border: 1px solid #ff7a94 !important;
+                color: #fff !important;
+                text-shadow: 0 0 6px rgba(255,255,255,.4) !important;
+                box-shadow: 0 10px 30px rgba(255,56,96,.35) !important;
+            }
+            .cp-toast-warn {
+                background: linear-gradient(135deg, #ffb400, #f39c12) !important;
+                border: 1px solid #ffe08a !important;
+                color: #1a1200 !important;
+                box-shadow: 0 10px 30px rgba(255,180,0,.35) !important;
+            }
+            .cp-toast-info {
+                background: linear-gradient(135deg, #00f0ff, #0091ff) !important;
+                border: 1px solid #aef6ff !important;
+                color: #00222b !important;
+                box-shadow: 0 10px 30px rgba(0,240,255,.35) !important;
+            }
             @keyframes toast-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
 
             /* ---------- 结果列表 ---------- */
@@ -4911,18 +4937,43 @@ async function res467_19(link1087_45, cli1260_52 = null) {
                 </div>
             </div>
         <script>
-            // 当前IP地区检测 (ping0.cc JSONP, script 加载不受 CORS 限制)
-            window.cfboxRegionCallback = function (ip, loc, asn, org, cc) {
+            // 当前IP地区检测 (多源 JSONP: ping0.cc 主源 + ipinfo.io 备用, script 加载不受 CORS 限制)
+            window.cfboxRegionCallback = function (a, b, c, d, e) {
                 var el = document.getElementById('currentIPRegion');
-                if (el && loc) el.textContent = ' · ' + loc;
+                if (!el || window.__cfRegionDone) return;
+                var loc = null;
+                if (b) {
+                    loc = b;
+                } else if (a && typeof a === 'object') {
+                    loc = [a.country, a.region, a.city].filter(function (x) { return x; }).join(' ');
+                }
+                if (loc) {
+                    el.textContent = ' · ' + loc;
+                    window.__cfRegionDone = true;
+                }
             };
             (function () {
-                try {
-                    var s = document.createElement('script');
-                    s.src = 'https://ipv4.ping0.cc/geo/jsonp/cfboxRegionCallback';
-                    s.async = true;
-                    (document.head || document.documentElement).appendChild(s);
-                } catch (e) {}
+                window.__cfRegionDone = false;
+                var sources = [
+                    'https://ipv4.ping0.cc/geo/jsonp/cfboxRegionCallback',
+                    'https://ipinfo.io/?callback=cfboxRegionCallback'
+                ];
+                var idx = 0;
+                function loadNext() {
+                    if (window.__cfRegionDone || idx >= sources.length) return;
+                    var src = sources[idx++];
+                    try {
+                        var s = document.createElement('script');
+                        s.src = src;
+                        s.async = true;
+                        s.onerror = function () { loadNext(); };
+                        (document.head || document.documentElement).appendChild(s);
+                    } catch (e) {}
+                }
+                loadNext();
+                setTimeout(function () {
+                    if (!window.__cfRegionDone && idx < sources.length) loadNext();
+                }, 4000);
             })();
         </script>
         <div class="container">
@@ -5297,6 +5348,7 @@ xn--b6gac.eu.org
                 <div style="text-align: center; margin: 20px 0;">
                     <a href="https://www.youtube.com/@PAI_CN" target="_blank" rel="noopener noreferrer" style="color: #00f0ff; text-decoration: none; margin: 0 20px; font-size: 1.2rem; text-shadow: 0 0 5px #00f0ff;">YouTube @PAI_CN</a>
                     <a href="https://t.me/SZ_PAI" target="_blank" rel="noopener noreferrer" style="color: #00f0ff; text-decoration: none; margin: 0 20px; font-size: 1.2rem; text-shadow: 0 0 5px #00f0ff;">Telegram @SZ_PAI</a>
+                    <a href="https://github.com/PAICNI/CFBox" target="_blank" rel="noopener noreferrer" style="color: #00f0ff; text-decoration: none; margin: 0 20px; font-size: 1.2rem; text-shadow: 0 0 5px #00f0ff;">GitHub@CFBox</a>
                 </div>
             </div>
 </div>
@@ -5664,6 +5716,7 @@ window.ShowToast = function (Msg20202, Type20201, Local20200) {
     Close.setAttribute('aria-label', 'close');
     Close.textContent = '✕';
     Toast.appendChild(Close);
+    Close.addEventListener('click', CloseToast);
   }
   XXX3.appendChild(Toast);
   requestAnimationFrame(function () {
@@ -5679,7 +5732,6 @@ window.ShowToast = function (Msg20202, Type20201, Local20200) {
       if (Toast.parentNode) Toast.parentNode.removeChild(Toast);
     }, 400);
   }
-  Close.addEventListener('click', CloseToast);
   var Timer = setTimeout(CloseToast, XXXXX3);
   Toast.addEventListener('mouseenter', function () {
     clearTimeout(Timer);
@@ -6749,20 +6801,13 @@ async function SaveConfig(CfgData20107) {
   }
 }
 function ShowStatus(Msg20100, Type20099) {
-  const StatusVal = document.getElementById('statusMessage');
-  if (StatusVal) {
-    StatusVal.textContent = Msg20100;
-    StatusVal.style.display = 'block';
-    StatusVal.style.color = Type20099 === 'success' ? '#00f0ff' : '#ff3860';
-    StatusVal.style.borderColor = Type20099 === 'success' ? '#00f0ff' : '#ff3860';
-    setTimeout(function () {
-      StatusVal.style.display = 'none';
-    }, 3000);
-  }
-  // 同步在底部操作条上方弹出霓虹反馈
-  if (typeof window.ShowOpStatus === 'function') {
-    window.ShowOpStatus(Msg20100, Type20099 === 'success' ? 'ok' : 'err');
-  }
+  // 保存/操作结果提示统一改为右上角 toast（与复制成功提示一致），反差色
+  const IsOk20098 = Type20099 === 'success';
+  window.ShowToast(Msg20100, IsOk20098 ? 'success' : 'error', {
+    title: IsOk20098 ? '✅ 操作成功' : '❌ 操作失败',
+    hideIcon: true,
+    noClose: true
+  });
 }
 async function ResetAllConfig() {
   if (confirm('确定要重置所有配置吗？这将清空所有KV配置，恢复为环境变量设置。')) {
@@ -9271,8 +9316,10 @@ export default {
       const proto584_24 = res1091_45.method === 'POST';
       const data1094_45 = new URL(res1091_45.url);
       const proto920_38 = data1094_45.pathname.split('/').filter(node870_36 => node870_36);
+      // 兼容大小写的 U / UUID 环境变量读取 (u/U/uuid/UUID/Uuid 等任意写法均可)
+      const envU_66 = (() => { const env_66 = srv770_32 || {}; for (const key_66 of Object.keys(env_66)) { const low_66 = key_66.toLowerCase(); if (low_66 === 'u' || low_66 === 'uuid') return env_66[key_66]; } return ''; })();
       if (!fn598_24 && !proto584_24 && data1094_45.pathname !== '/') {
-        const util1311_54 = (srv770_32.U || '').toLowerCase();
+        const util1311_54 = (envU_66 || '').toLowerCase();
         const data1310_54 = (srv770_32.d || srv770_32.D || '').toLowerCase();
         const data1430_59 = proto920_38[0] || '';
         const mgr160_6 = data1310_54.startsWith('/') ? data1310_54.substring(1) : data1310_54;
@@ -9284,7 +9331,7 @@ export default {
       }
       await op570_23(srv770_32);
        // read auth token: uppercase var U (UUID-compatible), trim and lowercase
-      aux71_2 = String(srv770_32.U || srv770_32.UUID || aux71_2 || '').trim().toLowerCase();
+      aux71_2 = String(envU_66 || aux71_2 || '').trim().toLowerCase();
       const val1339_55 = (srv770_32.d || srv770_32.D || aux71_2).toLowerCase();
       const tmp768_31 = state449_18('p', srv770_32.p || srv770_32.P);
       let link1327_55 = false;
@@ -9780,8 +9827,8 @@ export default {
           const buf653_27 = net651_27 === 'fa' ? 'fa-IR' : net651_27 === 'en' ? 'en' : 'zh-CN';
           const arr765_31 = {
             zh: {
-              title: 'CFBox 终端 v1.0',
-              terminal: 'CFBox 终端 v1.0',
+              title: 'CFBox 终端 v1.1',
+              terminal: 'CFBox 终端 v1.1',
               congratulations: '恭喜你来到这',
               enterU: '请输入你U变量的值',
               enterD: '请输入你D变量的值',
@@ -9797,8 +9844,8 @@ export default {
               reenter: '请重新输入有效的UUID'
             },
             fa: {
-              title: 'ترمینال v1.0',
-              terminal: 'ترمینال v1.0',
+              title: 'ترمینال v1.1',
+              terminal: 'ترمینال v1.1',
               congratulations: 'تبریک می‌گوییم به شما',
               enterU: 'لطفا مقدار متغیر U خود را وارد کنید',
               enterD: 'لطفا مقدار متغیر D خود را وارد کنید',
@@ -9814,8 +9861,8 @@ export default {
               reenter: 'لطفا UUID معتبر را دوباره وارد کنید'
             },
             en: {
-              title: 'CFBox Terminal v1.0',
-              terminal: 'CFBox Terminal v1.0',
+              title: 'CFBox Terminal v1.1',
+              terminal: 'CFBox Terminal v1.1',
               congratulations: 'Congratulations, you made it here',
               enterU: 'Please enter the value of your U variable',
               enterD: 'Please enter the value of your D variable',
@@ -9990,18 +10037,43 @@ export default {
                 </div>
             </div>
         <script>
-            // 当前IP地区检测 (ping0.cc JSONP, script 加载不受 CORS 限制)
-            window.cfboxRegionCallback = function (ip, loc, asn, org, cc) {
+            // 当前IP地区检测 (多源 JSONP: ping0.cc 主源 + ipinfo.io 备用, script 加载不受 CORS 限制)
+            window.cfboxRegionCallback = function (a, b, c, d, e) {
                 var el = document.getElementById('currentIPRegion');
-                if (el && loc) el.textContent = ' · ' + loc;
+                if (!el || window.__cfRegionDone) return;
+                var loc = null;
+                if (b) {
+                    loc = b;
+                } else if (a && typeof a === 'object') {
+                    loc = [a.country, a.region, a.city].filter(function (x) { return x; }).join(' ');
+                }
+                if (loc) {
+                    el.textContent = ' · ' + loc;
+                    window.__cfRegionDone = true;
+                }
             };
             (function () {
-                try {
-                    var s = document.createElement('script');
-                    s.src = 'https://ipv4.ping0.cc/geo/jsonp/cfboxRegionCallback';
-                    s.async = true;
-                    (document.head || document.documentElement).appendChild(s);
-                } catch (e) {}
+                window.__cfRegionDone = false;
+                var sources = [
+                    'https://ipv4.ping0.cc/geo/jsonp/cfboxRegionCallback',
+                    'https://ipinfo.io/?callback=cfboxRegionCallback'
+                ];
+                var idx = 0;
+                function loadNext() {
+                    if (window.__cfRegionDone || idx >= sources.length) return;
+                    var src = sources[idx++];
+                    try {
+                        var s = document.createElement('script');
+                        s.src = src;
+                        s.async = true;
+                        s.onerror = function () { loadNext(); };
+                        (document.head || document.documentElement).appendChild(s);
+                    } catch (e) {}
+                }
+                loadNext();
+                setTimeout(function () {
+                    if (!window.__cfRegionDone && idx < sources.length) loadNext();
+                }, 4000);
             })();
         </script>
         <div class="terminal">
